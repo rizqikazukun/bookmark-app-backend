@@ -1,21 +1,67 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { AuthDto } from './dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { RegisterDto, LoginDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private config: ConfigService,
+  ) {}
 
-  login(): any {
-    return {
-      status: 200,
-      message: 'login success',
-    };
+  async login(dto: LoginDto) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('Email is not registered');
+      }
+
+      const passwordMatch = await argon.verify(user.password, dto.password);
+
+      if (!passwordMatch) {
+        throw new BadRequestException('Wrong password');
+      }
+
+      interface Payload {
+        sub: number;
+        email: string;
+      }
+
+      const payload: Payload = {
+        sub: user.id,
+        email: user.email,
+      };
+
+      return {
+        statusCode: 200,
+        message: 'Login Success',
+        accessToken: await this.jwtService.signAsync(payload, {
+          secret: this.config.get('JWT_SECRET'),
+          expiresIn: '15m',
+        }),
+        // refreshToken: '',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  async register(dto: AuthDto) {
+  async register(dto: RegisterDto) {
     try {
       const hash: string = await argon.hash(dto.password);
       const user = await this.prisma.user.create({
