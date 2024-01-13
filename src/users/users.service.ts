@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -6,13 +6,21 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getMe(user: any) {
-    const usr = await this.prisma.user.findUnique({
-      where: {
-        id: user.sub,
-      },
-    });
+    try {
+      const usr = await this.prisma.user.findUnique({
+        where: {
+          id: user.sub,
+        },
+      });
 
-    delete usr.password;
-    return usr;
+      if (!usr) {
+        throw new NotFoundException('User is not registered');
+      }
+
+      delete usr.password;
+      return usr;
+    } catch (error) {
+      throw error;
+    }
   }
 }
