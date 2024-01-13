@@ -5,7 +5,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { JwtGuard } from 'src/auth/guard';
+import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
 import { UsersService } from './users.service';
 
