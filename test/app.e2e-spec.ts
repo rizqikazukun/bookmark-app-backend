@@ -6,6 +6,7 @@ import * as pactum from 'pactum';
 import { LoginDto, RegisterDto } from '../src/auth/dto';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersDto } from 'src/users/dto';
+import { CreateBookmarkDto, UpdateBookmarkDto } from 'src/bookmarks/dto';
 
 describe('App-e2e', () => {
   let app: INestApplication;
@@ -184,10 +185,69 @@ describe('App-e2e', () => {
   });
 
   describe('Bookmarks', () => {
-    describe('Create Bookmark', () => {});
-    describe('Get Bookmarks', () => {});
-    describe('Get Bookmark by id', () => {});
-    describe('Edit Bookmark', () => {});
-    describe('Delete Bookmark', () => {});
+    describe('Get Bookmarks', () => {
+      it('should be throw error 404', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(404);
+      });
+    });
+
+    describe('Create Bookmark', () => {
+      it('should create new bookmark', () => {
+        const dto: CreateBookmarkDto = {
+          title: 'How to use query parameters in Nest.js?',
+          link: 'https://stackoverflow.com/questions/54958244/how-to-use-query-parameters-in-nest-js',
+        };
+
+        return pactum
+          .spec()
+          .post('/bookmarks')
+          .withBody(dto)
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(201)
+          .stores('bookmarkId', 'data.id');
+      });
+    });
+
+    describe('Get Bookmark by id', () => {
+      it('should be get one by bookmark id', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200);
+      });
+    });
+
+    describe('Edit Bookmark', () => {
+      it('should update bookmark', () => {
+        const dto: UpdateBookmarkDto = {
+          description: 'Solving querry problem on nest js',
+        };
+
+        return pactum
+          .spec()
+          .patch('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBody(dto)
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200);
+      });
+    });
+
+    describe('Delete Bookmark', () => {
+      it('should delete bookmark', () => {
+        return pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200);
+      });
+    });
   });
 });

@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { BookmarksService } from './bookmarks.service';
 import { CreateBookmarkDto, UpdateBookmarkDto } from './dto';
-import { GetUser } from 'src/auth/decorator';
-import { JwtGuard } from 'src/auth/guard';
+import { GetUser } from '../auth/decorator';
+import { JwtGuard } from '../auth/guard';
 
 @Controller('bookmarks')
 export class BookmarksController {

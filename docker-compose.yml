@@ -1,7 +1,7 @@
 # Use postgres/example user/password credentials
 version: '3.8'
 services:
-  db:
+  dev-db:
     image: postgres:15
     restart: always
     ports:
