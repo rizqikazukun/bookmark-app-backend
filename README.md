@@ -43,7 +43,7 @@ Save configuration below to ``.env`` or ``.env.test`` , if you are using docker 
 Fill with config below for the dev environment:  
 ``DATABASE_URL="postgres://postgres:good-password@localhost:5434/postgres"``
 
-Or Fill with config below for the dev environment:  
+Or Fill with config below for the Test environment:  
 ``DATABASE_URL="postgres://postgres:good-password@localhost:5435/postgres"``
 
 For the configuration you can check on config below.
